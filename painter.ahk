@@ -31,28 +31,27 @@ Dot(x,y)
 
 
 ; draws a circle with center at x,y radius of r [skalar # of dots,start = degree of start bow (math. negativ), end = dgree of end bow(math. negativ)]
-;there are still issus around 360||0 degree work around with overflow of 10 degree
-Circle(x,y,r,skalar:=0.003,start:=0,end:=370)
+; with low skalar (fast circle) problem with closing of circle
+Circle(x,y,r,skalar:=100,start:=0,end:=380)
 {
 	setformat,float, 0.10
-	skalar := r * skalar
-	counter := (end-start) * skalar
+	skalar := 1/r * skalar
 	begin_bow := CircleEdge(x,y,r,start)
 	MouseMove, begin_bow[1], begin_bow[2]
 	Click down left
-	sleep, 100
-	Loop, %counter%{
-		rad := ((A_Index-start)*(0.01745329252 /skalar)) 	;convert degree to rad
-		x2 := x+r*Cos(rad)						;get next x/y 
-		y2 := y+r*Sin(rad)
-		if ((round(x2) != x) && (round(y2) != y)){ 		;cut out zeros (centerdots on limmited plane)
+	sleep, 80
+	position := start
+	while (position < end){
+		dot  := CircleEdge(x,y,r,(position)) 
+		if ((round(dot[1]) != x) && (round(dot[2]) != y)){ 		;cut out zeros (centerdots on limmited plane)
 			;msgbox % x2 "," y2 "," x "," y
 			sleep, 1
-			Dot(x2,y2)
+			Dot(dot[1],dot[2])
 			}
+		position := position  + skalar
 		}
 
-	sleep, 100
+	sleep, 80
 	Click up left
 	
 }
@@ -80,7 +79,7 @@ MouseGetPos, x , y
 Send {Control Down}
 ;Line(x,y,0,+20)
 ;msgbox %x% %y%
-Circle(x,y,100,0.002)
+Circle(x,y,100)
 Send {Ctrl Up}
 MouseMove, x,y
 return
@@ -102,11 +101,11 @@ return
 #z::
 MouseGetPos, x , y
 Send {Control Down}
-Circle(x,y,40)
+Circle(x,y,40,300)
 Loop, 6{
 	coords := CircleEdge(x,y,40,A_Index * 60)
 	; Msgbox % A_Index * 60  ; "," coords[1] "," coords[2]
-	Circle(coords[1],coords[2],50)
+	Circle(coords[1],coords[2],50,350)
 }
 Send {Ctrl Up}
 return
@@ -213,9 +212,54 @@ Print_b(x,y,c:=1)
 MouseGetPos, x , y
 Send {Control Down}
 ;print_a(x,y+10,0)
-Print_a(x+51,y,1)
-Print_b(x+102,y,1)
-
+;Print_a(x+51,y,1)
+;Print_b(x+102,y,1)
 Send {Ctrl Up}
+Sleep 100
+Send {Ctrl Down}
+Circle(x-24,y-15,15,0.003,10,90)
+Send {Ctrl Up}
+Sleep 100
 return
 
+;print smiley
+#s::
+MouseGetPos, x, y
+Send {Ctrl Down}
+Circle(x,y,70,400,0,370)		;kopf
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-25,y-15,15,120,0,400)			;auge <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+25,y-15,15,120,0,400)			;auge >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+15,y-12,15,120,275,410)	;iris >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-15,y-12,15,120,130,265)	;iris <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+15,y-12,5,,230,500)	;pupile >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-15,y-12,5,,30,320)	;pupile <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x,y+10,35,120,60,160)		;mouth
+Send {Ctrl Up}
+grin := CircleEdge(x,y+10,35,160) 
+Sleep 10
+Send {Ctrl Down}
+Circle(grin[1]-6,grin[2]-6,10,,20,100)	;grin
+Send {Ctrl Up}
+Sleep 10
+return
