@@ -263,3 +263,40 @@ Circle(grin[1]-6,grin[2]-6,10,,20,100)	;grin
 Send {Ctrl Up}
 Sleep 10
 return
+
+
+;print sad smiley
+#d::
+MouseGetPos, x, y
+Send {Ctrl Down}
+Circle(x,y,70,400,0,370)		;kopf
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-25,y-15,15,120,0,400)			;auge <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+25,y-15,15,120,0,400)			;auge >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+15,y-12,15,120,275,410)	;iris >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-15,y-12,15,120,130,265)	;iris <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x+15,y-12,5,,230,500)	;pupile >
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x-15,y-12,5,,30,320)	;pupile <
+Send {Ctrl Up}
+Sleep 10
+Send {Ctrl Down}
+Circle(x,y+70,35,120,230,320)		;mouth
+Send {Ctrl Up}
+return
