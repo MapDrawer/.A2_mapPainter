@@ -34,6 +34,9 @@ Dot(x,y)
 {
 	
 	MouseMove, x,y
+	Click down left
+	sleep 5
+	Click up left
 }
 
 
@@ -53,7 +56,7 @@ Circle(x,y,r,skalar:=100,start:=0,end:=380)
 		if ((round(dot[1]) != x) && (round(dot[2]) != y)){ 		;cut out zeros (centerdots on limmited plane)
 			;msgbox % x2 "," y2 "," x "," y
 			sleep, 1
-			Dot(dot[1],dot[2])
+			MouseMove, dot[1],dot[2]
 			}
 		position := position  + skalar
 		}
@@ -407,34 +410,95 @@ Send {Ctrl up}
 return
 
 
-;soak2 todo: für dynamische punktgröße alle punkte nach entfernungen sortiert in array speichern und dann von außen nach innen (oder ander herum) zeichnen damit nicht minimal msp_starke() aufgerufen wird
+;soak2 
 #v::
 MouseGetPos, x, y
+objekte_array := Object()
 dim := 500 ;dimension 300x300
 start := 210 ;startpunkt kreisausschnitt
 wideness := 1 ;weite in grad des bogenausschnittes
 end := start+wideness ;ein grad, kreisausschnitt
-number_bows := 50 ;anzahl der zu zeichnenden segmetausschnitte
+number_bows := 100 ;anzahl der zu zeichnenden segmetausschnitte
 radius := dim/2 ;entfernung vom zentrum
-starke := 5 ;strichstärke
+starke := 1 ;strichstärke
 msp_starke(1) ;strichstärke 1
 line(x-dim/2,y,x+dim/2,y) ;horizontale line
 line(x,y-dim/2,x,y+dim/2) ;vertikale line
 msp_starke(starke) ;strichstärke 5
 Loop, %number_bows%{
+	dot_data := Object()	
 	random, start, 0, 359
 	end := start+wideness
 	random, radius, 1, dim/2
-	;if (radius > dim/10)
-	;	starke := 2
-	;if (radius > dim/5)
-	;	starke := 3
-	;if (radius > (3*dim)/10)
-	;	starke := 4
-	;if (radius > (4*dim)/10)
-	;	starke := 5
-	;msp_starke(starke)
-	circle(x,y,radius,150,start,end)
+		;dynamische punktgröße. erstes drittel 3px, 2. 5px,3. 7px
+	if (radius <= dim/6)
+		starke := 3
+	else if (radius >= dim/3)
+		starke := 7
+		else
+			starke := 5
+	dot_data[1] := "c"
+	dot_data[2] := starke
+	dot_data[3] := x
+	dot_data[4] := y
+	dot_data[5] := radius
+	dot_data[6] := 150
+	dot_data[7] := start
+	dot_data[8] := end
+	objekte_array.Insert(dot_data)
 }
-Send {LControl down}{NumpadAdd}{LControl up}
+paint_array(objekte_array)
+return
+
+
+;zeichnet das übergebene array jeder eintrag im array ist ein object() mit dem 
+;- ersten eintrag l(line),d(dot),c(circle)
+;- zweiten eintrag strichstärke 1-50 
+;- startkoordinaten x,y
+;- bei line endkoordiante x,y
+;- bei circle radius, punkthäufigkeit,start,ende
+
+
+paint_array(dots_array){
+	loop,50{
+		starke := a_index
+		for index, element in dots_array{
+			if (element[2] = starke){
+				if (aktuelle_starke != starke){
+					aktuelle_starke := starke
+					msp_starke(starke)
+					}
+				if (element[1] = "d"){
+					;msgbox % "zeichne element #" . index  . " mit " .  element[1] . " " . element[2] . " " . element[3] . " " . element[4]
+					Dot(element[3] , element[4])
+				}
+				if (element[1] = "l"){
+					;msgbox % "zeichne element #" . index  . " mit " .  element[1] . " " . element[2] . " " . element[3] . " " . element[4] . " " . element[5] . " " . element[6]
+					Line(element[3] , element[4], element[5] , element[6])
+				}
+				if (element[1] = "c"){
+					;msgbox % "zeichne element #" . index  . " mit " .  element[1] . " " . element[2] . " " . element[3] . " " . element[4] . " " . element[5] . " " . element[6] . " " . element[7] . " " . element[8]
+					Circle(element[3] , element[4], element[5] , element[6], element[7] , element[8])
+				}
+			}
+		}
+	}
+}
+
+#b:: ;arraytest
+dots_array := Object()
+Loop, 10{
+	dot_data := Object()	;muss im loop stehen, damit immer wieder ein neues object erzeugt wird
+	random, zahl,1,5
+	dot_data[1] := "d"
+	dot_data[2] := zahl
+	dot_data[3] := 100
+	dot_data[4] := 200
+	;msgbox % "dotdata " . dot_data[1] . " " . dot_data[2] . " " . dot_data[3] . " " . dot_data[4] 
+	dots_array.Insert(dot_data)
+}
+paint_array(dots_array)
+for index, element in dots_array{
+	;msgbox % "element #" . %index%  . " ist " .  element[1] . " " . element[2] . " " . element[3] . " " . element[4]
+}
 return
